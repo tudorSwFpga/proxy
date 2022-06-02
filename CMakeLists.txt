@@ -2,7 +2,7 @@
 # la logique spécifique au projet ici.
 #
 cmake_minimum_required (VERSION 3.8)
-include(${CMAKE_CURRENT_SOURCE_DIR}/plog/CMakeLists.txt)
+include(${CMAKE_CURRENT_SOURCE_DIR}/plog @ 99191e1/CMakeLists.txt)
 
 set (CMAKE_CXX_STANDARD 14)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
