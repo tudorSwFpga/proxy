@@ -1,5 +1,6 @@
 #include <iostream>
-
+#ifndef RUNNABLE_H
+#define RUNNABLE_H
 
 class runnable
 {
@@ -18,3 +19,5 @@ protected:
 	bool m_isRunning;
 
 };
+
+#endif
