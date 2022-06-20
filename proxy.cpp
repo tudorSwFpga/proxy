@@ -54,7 +54,7 @@ void TcpServer::manageConnections(){
 
 /* Poll the list of sockets.
 */
-void TcpServer::receiveData(){
+void TcpServer::receiveData(std::shared_ptr<dataManager<std::string>> dataHandler){
 	pollfd* pollfds = new pollfd[BACKLOG];
 	char* msgBuf = new char[MSG_MAX_SIZE];
 	int ret;
@@ -82,6 +82,7 @@ void TcpServer::receiveData(){
 	    		else if (pollfds[i].revents & POLLIN ) {
 	    	       if (read(pollfds[i].fd, msgBuf, MSG_MAX_SIZE) != 0){
 	    	       	PLOG_INFO << "From " << pollfds[i].fd << std::string(msgBuf);
+	    	       	dataHandler->push(std::string(msgBuf),"TCPServer");
 	    	       }
 	    	    } else {
 	    	    	PLOG_INFO << "on FD " << pollfds[i].fd << "Unknown poll revent: " << pollfds[i].revents;

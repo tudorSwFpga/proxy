@@ -15,11 +15,17 @@
 #include <plog/Log.h>
 #include <mutex>
 #include "runnable.hpp"
+#include "dataManager.hpp"
+#ifndef PROXY_H
+#define PROXY_H
 
 class TcpServer:public runnable
 {
 public:
-	TcpServer():m_pollTimeout{1,1000000000},m_tcpPort(TCP_LISTEN_PORT)
+	/*constructor uses data manager pointer that well be used to get a data manager port and 
+	  use its methods for data management */
+	//TcpServer(dataManager<v2xMessage_t> *dataMPtr ):m_pollTimeout{1,1000000000},m_tcpPort(TCP_LISTEN_PORT)
+	TcpServer(std::shared_ptr<dataManager<std::string>> dataHandler):m_pollTimeout{1,1000000000},m_tcpPort(TCP_LISTEN_PORT)
 	{
 		PLOG_INFO << " Creating object";
 		this -> createSocket();
@@ -29,7 +35,7 @@ public:
 		//manageConnections();
 		//on the current thread just process data (poll for read)
 			//this -> receiveData();
-		receiveData();
+		receiveData(dataHandler);
 		m_connectionMgmThread -> join();
 
 	}
@@ -56,10 +62,11 @@ private:
 	int createSocket();
 	//get connected clients list and convert to an array of pollfd. Used for poll syscall
 	void fdToPollFdArray(pollfd* pollfds);
-	void receiveData(message_t* receivedMessage);
-	void receiveData();
+	void receiveData(std::shared_ptr<dataManager<std::string>> dataHandler);
 	std::string getPeerIp(sockaddr* addr);
     uint16_t getPeerPort(sockaddr* addr);
     std::mutex m_connectedClientsMutex;
 	const timespec m_pollTimeout;
 };
+
+#endif
