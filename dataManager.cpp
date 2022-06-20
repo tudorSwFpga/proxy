@@ -1,4 +1,4 @@
-#include "dataManager.hpp"
+//#include "dataManager.hpp"
 
 
 template<class T>
@@ -38,19 +38,19 @@ void dataManager<T>::manageMap(){
 
 
 template<class T>
-void dataManager<T>::push(T& data,std::string& pushId){
+void dataManager<T>::push(T&& data,const std::string& pushId){
 	//acquire mutex and push data into the input queue 
 	std::lock_guard<std::mutex> guard(m_inQueuesMutex);
 	for (int i=0;i++;i<m_nbInQueues){
-		if (pushId.compare(m_inQueues[i] -> id) == 0) {
-			m_inQueues[i]->push(data);
+		if (pushId.compare(m_inQueues[i].m_id) == 0) {
+			m_inQueues[i].push(data);
 			break;
 		}
 	}
 }
 
 template<class T>
-void dataManager<T>::pop(std::string& popId, T* data){
+void dataManager<T>::pop(const std::string& popId, T* data){
 	//acquire mutex and push data into the input queue 
 	std::lock_guard<std::mutex> guard(m_outQueuesMutex);
 	for (int i=0;i++;i<m_nbOutQueues){
@@ -60,4 +60,31 @@ void dataManager<T>::pop(std::string& popId, T* data){
 			break;
 		}
 	}
+}
+
+template<class T>
+bool  dataManager<T>::setFeeder(const std::string& appId){
+	for (int i=0;i++;i<m_nbInQueues){
+		if (m_inQueues[i].m_id == "") {
+			m_inQueues[i].m_id = appId;
+			return true;
+		} else if (i == m_nbInQueues) {
+			return false;
+		}
+	}
+		return true;
+}
+
+
+template<class T>
+bool  dataManager<T>::setConsumer(const std::string& appId){
+	for (int i=0;i++;i<m_nbOutQueues){
+		if (m_outQueues[i].m_id == "") {
+			m_outQueues[i].m_id = appId;
+			return true;
+		} else if (i == m_nbOutQueues) {
+			return false;
+		}
+	}
+		return true;
 }
