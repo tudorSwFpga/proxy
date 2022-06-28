@@ -25,6 +25,14 @@ int TcpServer::createSocket(){
 	return sockfd;
 }
 
+void TcpServer::run(){
+	while(m_isRunning){
+		manageConnections();
+		receiveData(m_dataHandler);	
+	}
+	
+}
+
 /*  Manage TCP Connections
 - accept clients that want to establish connection
 - store their File Descriptors in a list
@@ -34,33 +42,33 @@ int TcpServer::createSocket(){
 void TcpServer::manageConnections(){
 
 
-	PLOG_INFO << " Manage Connection Thread";
+	PLOG_INFO << " Manage Connections";
 	using namespace std::chrono_literals;
 	sockaddr* clientAddr = new sockaddr();
 	socklen_t socketSize = sizeof(socklen_t);
-	while (true) {
-		//blocking call: if no connection done we will be blocked here instead of closing other connections
-		const int fd = accept(sockfd, clientAddr,&socketSize);
-		if (fd < 0)
-			throw std::runtime_error(std::strerror(errno));
-
+	int flags = fcntl(sockfd,F_GETFL,0);
+	fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
+	const int fd = accept(sockfd, clientAddr,&socketSize);
+	if (fd < 0)
+		PLOG_DEBUG << " No client connection request pending";
+	else{
 		PLOG_INFO << " Accepted new connection with : " <<  getPeerIp(clientAddr) << " : " << getPeerPort(clientAddr);
-
 		std::lock_guard<std::mutex> guard(m_connectedClientsMutex);
 		m_connectedClientsFds.push_back(fd);
-		std::this_thread::sleep_for(2000ms);
 	}
 }
 
 /* Poll the list of sockets.
 */
 void TcpServer::receiveData(std::shared_ptr<dataManager<std::string>> dataHandler){
+	PLOG_DEBUG << "Receive data ";
+
 	pollfd* pollfds = new pollfd[BACKLOG];
 	char* msgBuf = new char[MSG_MAX_SIZE];
 	int ret;
 	//TODO: poll timeout could be set as a parameter of a function parsed for config
-	while (true) // replace with is running or something like that
-	{
+	//while (true) // replace with is running or something like that
+	//{
 		fdToPollFdArray(pollfds);
 		ret = poll(pollfds,m_connectedClientsFds.size(), 1000);
 		/* On success, poll() returns a nonnegative value which is the
@@ -91,18 +99,12 @@ void TcpServer::receiveData(std::shared_ptr<dataManager<std::string>> dataHandle
 	    } else {
 	    	PLOG_INFO << "Poll Time out on " << ret << " sockets";
 	    }
-		sleep(2);
-	}
-
-    delete msgBuf;
-    delete pollfds;
+    delete[] msgBuf;
+    delete[] pollfds;
 }
 
 std::string TcpServer::getPeerIp(sockaddr* addr){
 	struct sockaddr_in *addr_in = (struct sockaddr_in *)addr;
-    //const char *s = 
-    //*s = inet_ntoa(addr_in->sin_addr);
-    //std:: cout << "Debug 3 "<< s << "\n" ;
     return std::string(inet_ntoa(addr_in->sin_addr));
 }
 

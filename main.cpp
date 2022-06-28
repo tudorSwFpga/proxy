@@ -4,6 +4,7 @@
 #include <plog/Initializers/RollingFileInitializer.h>
 #include "proxy.hpp"
 #include "dataManager.hpp"
+#include "calculator.hpp"
 
 int main()
 {
@@ -13,18 +14,25 @@ int main()
 	//create data manager
 	std::shared_ptr<dataManager<std::string>> dataM = std::make_shared<dataManager<std::string>>(1,2);
 	//set interfaces for the data manager
+	PLOG_INFO << "Setting data M interfaces";
+
 	dataM->setFeeder("TCPServer");
 	dataM->setConsumer("FlightCalculator");
 	dataM->setConsumer("CollisionCalculator");
 	//create tcp server 
-	std::unique_ptr<TcpServer> tcpServer = std::make_unique<TcpServer>(dataM);
+	//std::shared_ptr<TcpServer> tcpServer = std::make_shared<TcpServer>(dataM);
+	TcpServer tcpServer(dataM) ;
 
-	/*while (true) {
-		tcpServer -> manageConnections();
-	}*/
-	//launch proxy
-	//launch calculator
-	//launch logger
+	Calculator flight = Calculator("FlightCalculator",dataM);
+
+	//std::thread proxyTh(&TcpServer::run, tcpServer); 
+	std::thread proxyTh(&TcpServer::run, &tcpServer); 
+	std::thread flightTh(&Calculator::print, &flight); 
+	std::thread dataMTh(&dataManager<std::string>::manage, dataM);
+
+	flightTh.join();
+	dataMTh.join();
+	proxyTh.join();
 
 	return 0;
 }

@@ -24,25 +24,18 @@ class TcpServer:public runnable
 public:
 	/*constructor uses data manager pointer that well be used to get a data manager port and 
 	  use its methods for data management */
-	//TcpServer(dataManager<v2xMessage_t> *dataMPtr ):m_pollTimeout{1,1000000000},m_tcpPort(TCP_LISTEN_PORT)
-	TcpServer(std::shared_ptr<dataManager<std::string>> dataHandler):m_pollTimeout{1,1000000000},m_tcpPort(TCP_LISTEN_PORT)
+	TcpServer(std::shared_ptr<dataManager<std::string>> dataHandler):m_pollTimeout{1,1000000000},m_tcpPort(TCP_LISTEN_PORT),m_dataHandler(dataHandler)
 	{
 		PLOG_INFO << " Creating object";
 		this -> createSocket();
 		PLOG_INFO << " Socket created and set to Listen";
-		//launch new thread that does manages the connections
-		m_connectionMgmThread = std::make_unique<std::thread>(&TcpServer::manageConnections,this);
-		//manageConnections();
-		//on the current thread just process data (poll for read)
-			//this -> receiveData();
-		receiveData(dataHandler);
-		m_connectionMgmThread -> join();
-
 	}
 	~TcpServer(){
 		//close all the remaining connections
 		std::cout << "[TCP Server Destructor] Closing all the connections alive" << std::endl;
 	}	
+
+	void run();
 
 
 protected:
@@ -52,11 +45,10 @@ private:
 
 	void manageConnections(); 
 
-
+	std::shared_ptr<dataManager<std::string>> m_dataHandler;
 	u_int16_t m_tcpPort;
 	std::unique_ptr<std::thread> m_connectionMgmThread;
 	std::list<int> m_connectedClientsFds;
-	//std::list<sockaddr*> connectedClients;
 	struct sockaddr_in m_Address;
 	int sockfd;
 	int createSocket();

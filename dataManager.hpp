@@ -34,13 +34,13 @@ class dataManager: public runnable
 {
 
 public:
-	dataManager(uint8_t inQueues,uint8_t outQueues): m_nbInQueues(inQueues),m_nbOutQueues(outQueues), m_mode(broadcast)
+	dataManager(uint8_t inQueues,uint8_t outQueues): m_nbInQueues(inQueues),m_nbOutQueues(outQueues), m_mode(broadcast),m_pollPeriod(1)
 	{
-		PLOG_DEBUG << "Constructor; building " << m_nbInQueues << " input queues and "
-		           <<  m_nbOutQueues << " output queues";
+		PLOG_DEBUG << "Constructor; building " << unsigned(m_nbInQueues) << " input queues and "
+		           <<  unsigned(m_nbOutQueues) << " output queues";
 
-		m_inQueues = new queueWrapper<T>[m_nbInQueues];
-		m_inQueues = new queueWrapper<T>[m_nbOutQueues];
+		m_inQueues  = new queueWrapper<T>[m_nbInQueues];
+		m_outQueues = new queueWrapper<T>[m_nbOutQueues];
 	}
 
 	~dataManager(){
@@ -50,16 +50,19 @@ public:
 
 
 	void push(T&& data, const std::string& pushId);
-	void pop(const std::string& pushId, T* data);
+	//T pop(const std::string& pushId);
+	bool pop(const std::string& pushId, T* data);
 	//connect a feeder (get an id) to an input queue, if available
 	bool  setFeeder(const std::string& appId);
 	//connect a consumer (get an id) to an output queue, if available
 	bool  setConsumer(const std::string& appId); 
+	void  manage();
 
 
 private:
-	const uint8_t m_nbInQueues;
-	const uint8_t m_nbOutQueues;
+	const int m_nbInQueues;
+	const int m_nbOutQueues;
+	const int m_pollPeriod;
 
 	queueWrapper<T> * m_inQueues;
 	queueWrapper<T> * m_outQueues;
@@ -72,7 +75,6 @@ private:
 	std::mutex m_inQueuesMutex;
 	std::mutex m_outQueuesMutex;
 
-	void manage(uint8_t pollPeriod);
 	void manageBroadcast();
 	void manageMap();
 
