@@ -3,9 +3,10 @@
 #include <errno.h>
 #include <cstring>
 #include <chrono>
-#include <thread>
 #include <poll.h>
 #include <unistd.h>
+#include <plog/Log.h>
+
 
 int TcpServer::createSocket(){
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -21,6 +22,8 @@ int TcpServer::createSocket(){
 	if (bind(sockfd, (struct sockaddr *) &m_Address, sizeof(sockaddr_in)) < 0)
 		throw std::runtime_error(std::strerror(errno));
 	listen(sockfd,BACKLOG);
+	PLOG_INFO << " Socket created; Listening on port: " << m_tcpPort;
+
 
 	return sockfd;
 }

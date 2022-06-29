@@ -1,5 +1,4 @@
 #define BACKLOG 50
-#define TCP_LISTEN_PORT 50000
 #define MSG_MAX_SIZE 100 // 100 byts max sent by peer
 #include "common.hpp"
 #include <sys/types.h>
@@ -24,34 +23,31 @@ class TcpServer:public runnable
 public:
 	/*constructor uses data manager pointer that well be used to get a data manager port and 
 	  use its methods for data management */
-	TcpServer(std::shared_ptr<dataManager<std::string>> dataHandler):m_pollTimeout{1,1000000000},m_tcpPort(TCP_LISTEN_PORT),m_dataHandler(dataHandler)
+	TcpServer(uint16_t tcpPort,std::shared_ptr<dataManager<std::string>> dataHandler):m_pollTimeout{1,1000000000},m_tcpPort(tcpPort),m_dataHandler(dataHandler)
 	{
 		PLOG_INFO << " Creating object";
-		this -> createSocket();
-		PLOG_INFO << " Socket created and set to Listen";
+		createSocket();
 	}
 	~TcpServer(){
-		//close all the remaining connections
-		std::cout << "[TCP Server Destructor] Closing all the connections alive" << std::endl;
 	}	
 
+	//in running state all the magic operates
 	void run();
-
 
 protected:
 
 
 private:
 
-	void manageConnections(); 
-
+	//data handler, used when receiving packets
 	std::shared_ptr<dataManager<std::string>> m_dataHandler;
-	u_int16_t m_tcpPort;
-	std::unique_ptr<std::thread> m_connectionMgmThread;
+	uint16_t m_tcpPort;
 	std::list<int> m_connectedClientsFds;
 	struct sockaddr_in m_Address;
 	int sockfd;
+	
 	int createSocket();
+	void manageConnections(); 
 	//get connected clients list and convert to an array of pollfd. Used for poll syscall
 	void fdToPollFdArray(pollfd* pollfds);
 	void receiveData(std::shared_ptr<dataManager<std::string>> dataHandler);

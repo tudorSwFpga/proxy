@@ -2,7 +2,7 @@
 
 using namespace std;
 
-struct message_t
+struct v2xMessage_t
 {
 	char direction;
 	uint16_t speed;
