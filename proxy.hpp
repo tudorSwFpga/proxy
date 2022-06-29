@@ -24,7 +24,7 @@ class TcpServer:public runnable
 public:
 	/*constructor uses data manager pointer that well be used to get a data manager port and 
 	  use its methods for data management */
-	TcpServer(uint16_t tcpPort,std::shared_ptr<dataManager<std::string>> dataHandler):m_pollTimeout{1,1000000000},m_tcpPort(tcpPort),m_dataHandler(dataHandler)
+	TcpServer(uint16_t tcpPort,std::shared_ptr<dataManager<T>> dataHandler):m_pollTimeout{1,1000000000},m_tcpPort(tcpPort),m_dataHandler(dataHandler)
 	{
 		PLOG_INFO << " Creating object";
 		createSocket();

@@ -19,10 +19,10 @@ int main()
 	dataM->setConsumer("FlightCalculator");
 	dataM->setConsumer("CollisionCalculator");
 	//create tcp server 
-	TcpServer tcpServer(TCP_LISTEN_PORT, dataM) ;
+	TcpServer<std::string> tcpServer(TCP_LISTEN_PORT, dataM) ;
 	Calculator flight = Calculator("FlightCalculator",dataM);
 	//launch tcp server / data manager / calculator (consumer) in different threads
-	std::thread proxyTh(&TcpServer::run, &tcpServer); 
+	std::thread proxyTh(&TcpServer<std::string>::run, &tcpServer); 
 	std::thread dataMTh(&dataManager<std::string>::manage, dataM);
 	std::thread flightTh(&Calculator::print, &flight); 
 
