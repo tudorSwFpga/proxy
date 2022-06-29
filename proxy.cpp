@@ -1,4 +1,3 @@
-#include "proxy.hpp"
 #include <stdexcept>
 #include <errno.h>
 #include <cstring>
@@ -8,7 +7,8 @@
 #include <plog/Log.h>
 
 
-int TcpServer::createSocket(){
+template<class T>
+int TcpServer<T>::createSocket(){
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0) {
         throw std::runtime_error(std::strerror(errno));
@@ -28,7 +28,8 @@ int TcpServer::createSocket(){
 	return sockfd;
 }
 
-void TcpServer::run(){
+template<class T>
+void TcpServer<T>::run(){
 	while(m_isRunning){
 		manageConnections();
 		receiveData(m_dataHandler);	
@@ -42,7 +43,8 @@ void TcpServer::run(){
 - remove File descriptors from list when connections are closed
 - close connections when TCP server is closed
 */
-void TcpServer::manageConnections(){
+template<class T>
+void TcpServer<T>::manageConnections(){
 
 
 	PLOG_INFO << " Manage Connections";
@@ -63,7 +65,8 @@ void TcpServer::manageConnections(){
 
 /* Poll the list of sockets.
 */
-void TcpServer::receiveData(std::shared_ptr<dataManager<std::string>> dataHandler){
+template<class T>
+void TcpServer<T>::receiveData(std::shared_ptr<dataManager<T>> dataHandler){
 	PLOG_DEBUG << "Receive data ";
 
 	pollfd* pollfds = new pollfd[BACKLOG];
@@ -106,18 +109,21 @@ void TcpServer::receiveData(std::shared_ptr<dataManager<std::string>> dataHandle
     delete[] pollfds;
 }
 
-std::string TcpServer::getPeerIp(sockaddr* addr){
+template<class T>
+std::string TcpServer<T>::getPeerIp(sockaddr* addr){
 	struct sockaddr_in *addr_in = (struct sockaddr_in *)addr;
     return std::string(inet_ntoa(addr_in->sin_addr));
 }
 
-uint16_t TcpServer::getPeerPort(sockaddr* addr){
+template<class T>
+uint16_t TcpServer<T>::getPeerPort(sockaddr* addr){
 	struct sockaddr_in *addr_in = (struct sockaddr_in *)addr;
     return addr_in->sin_port;
 }
 
 
-void TcpServer::fdToPollFdArray(pollfd* pollfds ){
+template<class T>
+void TcpServer<T>::fdToPollFdArray(pollfd* pollfds ){
 	int pos = 0;
 	PLOG_DEBUG << "Having  " << m_connectedClientsFds.size() << " FDs";
 

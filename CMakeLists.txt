@@ -13,7 +13,7 @@ add_subdirectory(plog)
 
 # Ajoutez une source à l'exécutable de ce projet.
 #include_directories("/usr/local/include/plog")
-add_executable (v2x_test "main.cpp" "proxy.hpp" "proxy.cpp" "runnable.hpp" "runnable.cpp" "common.hpp" "plog/include/plog/Log.h"
+add_executable (v2x_test "main.cpp" "proxy.hpp" "runnable.hpp" "runnable.cpp" "common.hpp" "plog/include/plog/Log.h"
 			    "dataManager.hpp" "calculator.hpp")
 target_link_libraries(v2x_test 
 	Threads::Threads 

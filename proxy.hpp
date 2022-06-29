@@ -18,6 +18,7 @@
 #ifndef PROXY_H
 #define PROXY_H
 
+template<class T>
 class TcpServer:public runnable
 {
 public:
@@ -40,7 +41,7 @@ protected:
 private:
 
 	//data handler, used when receiving packets
-	std::shared_ptr<dataManager<std::string>> m_dataHandler;
+	std::shared_ptr<dataManager<T>> m_dataHandler;
 	uint16_t m_tcpPort;
 	std::list<int> m_connectedClientsFds;
 	struct sockaddr_in m_Address;
@@ -50,11 +51,13 @@ private:
 	void manageConnections(); 
 	//get connected clients list and convert to an array of pollfd. Used for poll syscall
 	void fdToPollFdArray(pollfd* pollfds);
-	void receiveData(std::shared_ptr<dataManager<std::string>> dataHandler);
+	void receiveData(std::shared_ptr<dataManager<T>> dataHandler);
 	std::string getPeerIp(sockaddr* addr);
     uint16_t getPeerPort(sockaddr* addr);
     std::mutex m_connectedClientsMutex;
 	const timespec m_pollTimeout;
 };
+
+#include "proxy.cpp"
 
 #endif
