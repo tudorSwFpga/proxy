@@ -14,4 +14,4 @@ find_package(Threads REQUIRED)
 
 
 # Ajoutez une source à l'exécutable de ce projet.
-add_executable (v2x_client "testclient.cpp")
+add_executable (testClient "testclient.cpp")
