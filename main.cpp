@@ -6,7 +6,7 @@
 #include <plog/Initializers/RollingFileInitializer.h>
 #include "proxy.hpp"
 #include "dataManager.hpp"
-#include "calculator.hpp"
+#include "consumer.hpp"
 
 int main()
 {
@@ -16,15 +16,15 @@ int main()
 	std::shared_ptr<dataManager<std::string>> dataM = std::make_shared<dataManager<std::string>>(1,2);
 	PLOG_INFO << "Setting data manager interfaces";
 	dataM->setFeeder("TCPServer");
-	dataM->setConsumer("FlightCalculator");
-	dataM->setConsumer("CollisionCalculator");
+	dataM->setConsumer("FrenchConsumer");
+	dataM->setConsumer("RomanianConsumer");
 	//create tcp server 
 	TcpServer<std::string> tcpServer(TCP_LISTEN_PORT, dataM) ;
-	Calculator flight = Calculator("FlightCalculator",dataM);
+	Consumer french = Consumer("FrenchConsumer",dataM);
 	//launch tcp server / data manager / calculator (consumer) in different threads
 	std::thread proxyTh(&TcpServer<std::string>::run, &tcpServer); 
 	std::thread dataMTh(&dataManager<std::string>::manage, dataM);
-	std::thread flightTh(&Calculator::print, &flight); 
+	std::thread flightTh(&Consumer::print, &french); 
 
 	flightTh.join();
 	dataMTh.join();
